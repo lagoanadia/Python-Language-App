@@ -5,7 +5,7 @@ from quiz import create_quiz_if_not_exists, save_word_quiz, update_word_status, 
 from ai import chat
 
 app = ctk.CTk()
-app.title("AI Converstion!")
+app.title("prata")
 app.state("zoomed")
 main_frame = ctk.CTkFrame(app)
 main_frame.pack(fill="both", expand=True)
