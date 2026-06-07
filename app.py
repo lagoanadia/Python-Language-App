@@ -154,26 +154,42 @@ def show_word():
 
 def check_answer():
     global current_index, current_word
-    if user_guess.get() == get_translation(current_word[current_index]):
+    
+    # Clean up user input and correct answer (.strip() removes spaces, .lower() ignores capitals)
+    guess = user_guess.get().strip().lower()
+    correct_answer = get_translation(current_word[current_index]).strip().lower()
+    
+    if guess == correct_answer:
         result(True, current_word[current_index])
-        current_index += 1
-        if current_index < len(current_word):
-            show_word()
-        else:
-            remaining = unlearnt_words()
-            if not remaining:
-                word_card.configure(state="normal")
-                word_card.delete("1.0", "end")
-                word_card.insert("1.0", "\n\n             Well Done!")
-                word_card.configure(state="disabled")
-            else:
-                current_word = remaining
-                current_index = 0
-                show_word()
+        
+        # DELAY moving to the next word by 1000ms so the user can actually see the green flash
+        word_card.after(1000, next_word) 
     else:
         result(False, current_word[current_index])
-    user_guess.delete(0, "end")
-          
+        # Even if they fail, wait 1 second for the red flash before clearing or letting them try again
+        word_card.after(1000, lambda: user_guess.delete(0, "end"))
+
+def next_word():
+    """Helper function to safely advance the quiz after the color flash finishes"""
+    global current_index, current_word
+    
+    current_index += 1
+    user_guess.delete(0, "end") # Clear the input box for the next word
+    
+    if current_index < len(current_word):
+        show_word()
+    else:
+        remaining = unlearnt_words()
+        if not remaining:
+            word_card.configure(state="normal")
+            word_card.delete("1.0", "end")
+            word_card.insert("1.0", "\n\n             Well Done!")
+            word_card.configure(state="disabled")
+        else:
+            current_word = remaining
+            current_index = 0
+            show_word()
+
 def show_quiz():
     global current_word, current_index
     current_word = unlearnt_words()
